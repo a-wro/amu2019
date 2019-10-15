@@ -52,3 +52,82 @@ SEVERE: java.io.NotSerializableException: point.Point$$Lambda$18/0x0000000840068
 ### 14. TODO
 
 # Singleton
+### 15.
+```
+public class Singleton {
+    private static Singleton instance;
+
+    public static synchronized Singleton getInstance() {
+        if (instance == null) {
+            instance = new Singleton();
+        }
+        return instance;
+    }
+
+    private Singleton() {}
+}
+```
+
+### 16.
+```
+  try {
+            Constructor<Singleton> constructor = Singleton.class.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            Singleton singleton = constructor.newInstance();
+            Singleton singleton1 = Singleton.getInstance();
+            // dwa różne obiekty
+        } catch (InstantiationException | IllegalAccessException
+                | InvocationTargetException | NoSuchMethodException e) {
+            ...
+        }
+```
+### 17.
+```
+public class ThreadUnsafeSingleton {
+    private static ThreadUnsafeSingleton instance;
+
+    public static ThreadUnsafeSingleton getInstance() {
+        if (instance == null) {
+            try {
+                instance = new ThreadUnsafeSingleton();
+            } catch (InterruptedException e) {}
+        }
+        return instance;
+    }
+
+    private ThreadUnsafeSingleton() throws InterruptedException {
+        Thread.sleep(500);
+    }
+}
+
+
+public class ConcurrencyAttack {
+    private static Logger logger = Logger.getLogger(ConcurrencyAttack.class.getName());
+
+    private static ThreadUnsafeSingleton s1;
+    private static ThreadUnsafeSingleton s2;
+    public static void main(String[] args) throws InterruptedException {
+        Runnable runnable = () -> {
+            s1 = ThreadUnsafeSingleton.getInstance();
+        };
+
+        Runnable runnable1 = () -> {
+            s2 = ThreadUnsafeSingleton.getInstance();
+        };
+
+        Thread a = new Thread(runnable);
+        Thread b = new Thread(runnable1);
+        a.start();
+        b.start();
+
+        Thread.sleep(1000);
+        logger.info(Boolean.toString(s1.equals(s2)));
+
+    }
+}
+```
+
+
+
+### 18.
+### 19.
