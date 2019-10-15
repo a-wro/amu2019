@@ -1,2 +1,4 @@
 .mvn*
 mvnw
+*vcs.xml
+*misc.xml
