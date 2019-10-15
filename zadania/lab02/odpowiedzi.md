@@ -82,6 +82,7 @@ public class Singleton {
         }
 ```
 ### 17.
+### 18.
 ```
 public class ThreadUnsafeSingleton {
     private static ThreadUnsafeSingleton instance;
@@ -127,7 +128,4 @@ public class ConcurrencyAttack {
 }
 ```
 
-
-
-### 18.
 ### 19.
