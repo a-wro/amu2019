@@ -82,6 +82,64 @@ public class Singleton {
         }
 ```
 ### 17.
+```
+public class SerializableSingleton implements Serializable {
+    private static long serialVersionUID = 123L;
+    private static SerializableSingleton instance;
+
+    public static SerializableSingleton getInstance() {
+        if (instance == null) {
+            instance = new SerializableSingleton();
+        }
+        return instance;
+    }
+
+    private SerializableSingleton() {}
+}
+
+
+public class SerializationAttack {
+    private static String FILE_PATH = "serialized_singleton.ser";
+    private static Logger logger = Logger.getLogger(SerializationAttack.class.getName());
+
+    public static void main(String[] args) {
+        SerializableSingleton s = SerializableSingleton.getInstance();
+
+        try {
+            FileOutputStream fileOutputStream= new FileOutputStream(
+                    new File(FILE_PATH)
+            );
+            ObjectOutputStream outputStream = new ObjectOutputStream(fileOutputStream);
+
+            outputStream.writeObject(s);
+
+            outputStream.close();
+            fileOutputStream.close();
+
+            FileInputStream fileInputStream = new FileInputStream(FILE_PATH);
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+
+            SerializableSingleton s2;
+            SerializableSingleton s3;
+
+            s2 = (SerializableSingleton) objectInputStream.readObject();
+
+            FileInputStream fileInputStream2 = new FileInputStream(FILE_PATH);
+            ObjectInputStream objectInputStream2 = new ObjectInputStream(fileInputStream2);
+            s3 = (SerializableSingleton) objectInputStream2.readObject();
+
+            logger.info(Boolean.toString(s2.equals(s3)));
+            // inne obiekty (chyba, że dodamy w singletonie metodę readResolve)
+
+
+    } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            logger.info(e.toString());
+        }
+    }
+}
+
+```
 ### 18.
 ```
 public class ThreadUnsafeSingleton {
@@ -129,3 +187,33 @@ public class ConcurrencyAttack {
 ```
 
 ### 19.
+- atak refleksją można zapobiec używając enumów, według niektórych źródeł jest to bezpieczne a według innych nie do końca
+```
+public enum EnumSingleton {
+    INSTANCE;
+
+    String title;
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+}
+```
+
+
+- zabezpieczenie przed atakiem wielowątkowym polega na dodaniu modifiera `synchronized` do statycznego gettera (lub innymi słowy użycie locków)
+
+
+- atak serializacją można powstrzymać enumem, podobnie jak atak refleksją, ale też dodając metodę readResolve:
+```
+private static final Singleton instance;
+...
+
+private Object readResolve() {
+    return instance;
+}
+```
