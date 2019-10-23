@@ -91,3 +91,7 @@ modules.xml
 target/
 
 # End of https://www.gitignore.io/api/intellij+all
+.mvn*
+mvnw
+*vcs.xml
+*misc.xml
