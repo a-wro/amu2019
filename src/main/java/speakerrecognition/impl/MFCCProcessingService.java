@@ -1,72 +1,15 @@
 package speakerrecognition.impl;
 
 
+import matrixes.Matrixes;
 import org.jtransforms.fft.DoubleFFT_1D;
+import speakerrecognition.data.MFCCWrapper;
 
 
-public class MFCC {
-	
-	private int frame_len;
-	private int frame_shift;
-	private int fft_size;// = 256;
-	private static int melfilter_bands = 40;
-	private static int mfcc_num = 13;
-	private static double power_spectrum_floor = 0.0001;
-	private static double pre_emph = 0.95;
-	private double[] window = null; 
-	private double[][] M = null;
-	//private double[] CF = null;
-	private double[][] melfb_coeffs = null;
-	private double[][] mfcc_coeffs = null;
-	private int[] samples = null; 
-	private int fs;
-	private double[][] D1 = null;
-	
-	public MFCC(int[] x, int y){
-		this.fs = y;
-		this.samples = x;
-		this.frame_len = 256;//setFrameLen(fs); !!!!!!!!!!!!! ZMIANA !!!!!!!!!!!!!!!!!!!!!!
-		this.fft_size = this.frame_len;
-		this.frame_shift = setFrameShift(fs);
-		window = hamming(frame_len);
-		
-		//this.melfb_coeffs = melfb(melfilter_bands, 256, fs); //!!!!!!!!!!!!!!!! USUN¥Æ !!!!!!!!!!!!!!!!!
-		this.melfb_coeffs = melfb(melfilter_bands, fft_size, fs);
-		
-		this.D1 = dctmatrix(melfilter_bands);
-		
-		if(this.melfb_coeffs==null) System.out.println("Cannot initialize melfilter bank");
-	}
-	
-/////////// setters for MFCC parameters ///////////////////////
-	
-	private int setFrameLen(int sample_rate){
-		return (int) (0.025*(double)(sample_rate));
-	}
-	
-	private int setFrameShift(int sample_rate){
-		return (int) (0.0125*(double)(sample_rate));
-	}
-	
-	private double[] hamming(int frame_len){
-		double[] window_temp = new double[frame_len];
-		for(int i=0;i<window_temp.length;i++){
-			window_temp[i] = 0.54-0.46*Math.cos(2*Math.PI/(double)frame_len*((double)i+0.5));
-		}
-		return window_temp;
-	}
-
-////////////////////////////////////////////////////////////////
-
-//////// getters for MFCC results/////////////////////////////
-	double[][] getMFCC(){
-		extract_MFCC();
-		return this.mfcc_coeffs;
-	}
-
+public class MFCCProcessingService {
 ///////////////// computation of mel filterbank ////////////////
 
-	private double[][] melfb(int p, int n, int fs){
+	public static double[][] melfb(int p, int n, int fs){
 		// p - number of filterbanks
 		// n - length of fft
 		// fs - sample rate 
@@ -105,17 +48,17 @@ public class MFCC {
 			pm[i] = pf[i] - fp[i];
 		}
 		
-		this.M = new double[p][1+fn2];
+		double[][] M = new double[p][1+fn2];
 		int r=0;
 		
 		for(int i=b2-1;i<b4;i++){
 			r = (int)fp[i]-1;
-			this.M[r][i+1] += 2* (1-pm[i]);
+			M[r][i+1] += 2* (1-pm[i]);
 		}
 		
 		for(int i=0;i<b3; i++){
 			r = (int)fp[i];
-			this.M[r][i+1] += 2* pm[i];
+			M[r][i+1] += 2* pm[i];
 		}
 		
 		/////////// normalization part //////////
@@ -124,8 +67,8 @@ public class MFCC {
 		double[] temp_row = null;
 		double row_energy = 0;
 		//System.out.println(Integer.toString(M.length));
-		for (int i=0;i<this.M.length;i++){
-			temp_row = this.M[i];
+		for (int i=0;i<M.length;i++){
+			temp_row = M[i];
 			row_energy = energy(temp_row);
 			if(row_energy < 0.0001)
 				temp_row[i] = i;
@@ -139,59 +82,55 @@ public class MFCC {
 					row_energy = energy(temp_row);
 				}
 			}
-			this.M[i] = temp_row;
+			M[i] = temp_row;
 			
 		}
-		
-	
-		
-		return this.M;		
+		return M;
 	}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-	private void extract_MFCC(){
+	public static MFCCWrapper extract_MFCC(MFCCWrapper oldWrapper){
+		MFCCWrapper extractedWrapper = new MFCCWrapper(oldWrapper);
 		// https://gist.github.com/jongukim/4037243
 		//http://dp.nonoo.hu/projects/ham-dsp-tutorial/05-sine-fft/
 		
-		if(this.samples!=null){
-			DoubleFFT_1D fftDo = new DoubleFFT_1D(this.frame_len);
-			double[] fft1 = new double[this.frame_len * 2];
-			double[] fft_final = new double[this.frame_len/2+1];
-			//int[] x = this.samples;
-			int frames_num = (int)((double)(this.samples.length - this.frame_len)/(double)(this.frame_shift))+1;
-			this.mfcc_coeffs = new double[frames_num][MFCC.mfcc_num];
-			double[] frame = new double[this.frame_len];
+		if(extractedWrapper.getSamples() != null){
+			int frameLen = extractedWrapper.getFrame_len();
+			int[] samples = extractedWrapper.getSamples();
+			int frameShift = extractedWrapper.getFrame_shift();
+
+			DoubleFFT_1D fftDo = new DoubleFFT_1D(frameLen);
+			double[] fft1 = new double[frameLen * 2];
+			double[] fft_final = new double[frameLen/2+1];
+			int frames_num = (int)((double)(samples.length - frameLen)/(double)(frameShift))+1;
+			extractedWrapper.setMfcc_coeffs(new double[frames_num][MFCCWrapper.mfcc_num]);
+			double[] frame = new double[frameLen];
 							
 			for(int i=0;i<frames_num;i++){
 				
-				for(int j=0;j<this.frame_len;j++){
-					frame[j] = (double)this.samples[i*this.frame_shift+j];
+				for(int j=0;j<frameLen;j++){
+					frame[j] = (double)samples[i*frameShift+j];
 				}
 				
 				try{
-					frame = Matrixes.row_mul(frame, window);
-				
+					frame = Matrixes.row_mul(frame, extractedWrapper.getWindow());
 					frame = preemphasis(frame);
-					System.arraycopy(frame, 0, fft1, 0, this.frame_len);
+					System.arraycopy(frame, 0, fft1, 0, frameLen);
 					fftDo.realForwardFull(fft1);
-					/*for(double d: fft1) {
-			          System.out.println(d);
-					}*/
-					
-					for(int k=0;k<(this.frame_len/2+1);k++){
+
+					for(int k=0;k<(frameLen/2+1);k++){
 						fft_final[k] = Math.pow(Math.sqrt(Math.pow(fft1[k*2],2)+Math.pow(fft1[k*2+1],2)), 2);
 						
-						if(fft_final[k]<power_spectrum_floor) fft_final[k]=power_spectrum_floor;
+						if(fft_final[k]<MFCCWrapper.power_spectrum_floor) fft_final[k]=MFCCWrapper.power_spectrum_floor;
 					}
 					
-					double[] dot_prod = Matrixes.multiplyByMatrix(this.melfb_coeffs, fft_final);
+					double[] dot_prod = Matrixes.multiplyByMatrix(extractedWrapper.getMelfb_coeffs(), fft_final);
 					for(int j=0;j<dot_prod.length;j++){
 						dot_prod[j] = Math.log(dot_prod[j]);
 					}
-					//double[][]D1 = dctmatrix(melfilter_bands);
-					dot_prod = Matrixes.multiplyByMatrix(this.D1, dot_prod);
-					this.mfcc_coeffs[i] = dot_prod;
+					dot_prod = Matrixes.multiplyByMatrix(extractedWrapper.getD1(), dot_prod);
+					extractedWrapper.setMfcc_coeffs(i, dot_prod);
 				}
 				catch(Exception myEx)
 		        {
@@ -201,17 +140,16 @@ public class MFCC {
 		        }
 				
 			}
-			//this.mfcc_coeffs = 
 		}
 		else{
 			System.out.println("Vector of input samples is null");
 		}
-		
+		return extractedWrapper;
 	}
 	
 	///////////// math functions ///////////////////////////////////////////////////////////////
 		
-	private static double[] arange(int x1, int x2){
+	public static double[] arange(int x1, int x2){
 		double[] temp = null;
 		try{
 		temp = new double[x2-x1];
@@ -226,23 +164,23 @@ public class MFCC {
 		return temp;
 	}
 	
-	private static double energy(double[] x){
+	public static double energy(double[] x){
 		double en = 0;
 		for(int i=0; i<x.length;i++)
 			en = en + Math.pow(x[i], 2);
 		return en;
 		}
 		
-	private double[] preemphasis(double[] x){
+	public static double[] preemphasis(double[] x){
 		double[] y = new double[x.length];
 		y[0] = x[0];
 		for(int i=1;i<x.length;i++){
-			y[i] = x[i]-MFCC.pre_emph*x[i-1];
+			y[i] = x[i]-MFCCWrapper.pre_emph*x[i-1];
 		}
 		return y;
 	}
 
-	private double[][] dctmatrix(int n){
+	public static double[][] dctmatrix(int n){
 		double[][] d1 = new double[n][n];
 		double[][] x = Matrixes.meshgrid_ox(n);
 		double[][] y = Matrixes.meshgrid_oy(n);
@@ -271,8 +209,8 @@ public class MFCC {
 			d1[0][i] /= Math.sqrt(2);
 		}
 		
-		double[][] d = new double[MFCC.mfcc_num][n];
-		for(int i=1;i<MFCC.mfcc_num+1;i++){
+		double[][] d = new double[MFCCWrapper.mfcc_num][n];
+		for(int i=1;i<MFCCWrapper.mfcc_num+1;i++){
 			for(int j=0;j<n;j++){
 				d[i-1][j] = d1[i][j];
 			}
@@ -280,5 +218,13 @@ public class MFCC {
 		}
 		
 		return d;
+	}
+
+	public static double[] hamming ( int frame_len){
+		double[] window_temp = new double[frame_len];
+		for (int i = 0; i < window_temp.length; i++) {
+			window_temp[i] = 0.54 - 0.46 * Math.cos(2 * Math.PI / (double) frame_len * ((double) i + 0.5));
+		}
+		return window_temp;
 	}
 }

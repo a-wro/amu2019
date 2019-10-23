@@ -1,7 +1,11 @@
-package speakerrecognition.impl;
+package speaker.data;
+import matrixes.Matrixes;
+import statistics.impl.StatisticsImpl;
+import utils.MyException;
+
 import java.io.Serializable;
 
-public class Speaker_model implements Serializable{
+public class SpeakerModel implements Serializable{
 	/**
 	 * 
 	 */
@@ -11,7 +15,7 @@ public class Speaker_model implements Serializable{
 	private double[] weights = null;
 	private String name = null;
 	
-	public Speaker_model(double[][] means, double[][] covars, double[] weights, String name){
+	public SpeakerModel(double[][] means, double[][] covars, double[] weights, String name){
 		this.means = means;
 		this.covars=covars;
 		this.weights=weights;
@@ -34,13 +38,13 @@ public class Speaker_model implements Serializable{
 		return this.name;
 	}
 	
-	public double getScore(double[][] data) throws MyException{
+	public double getScore(double[][] data) throws MyException {
 		double score = 0;
 		double[] logprob = null;
 		double[][] lpr = log_multivariate_normal_density(data, this.means, this.covars);
 		lpr = Matrixes.addValue(lpr, Matrixes.makeLog(this.weights));
 		logprob = Matrixes.logsumexp(lpr);
-		score = Statistics.getMean(logprob);
+		score = StatisticsImpl.getMean(logprob);
 		return score;
 	}
 	

@@ -1,7 +1,7 @@
-package speakerrecognition.impl;
+package statistics.impl;
 
 
-public final class Statistics {
+public final class StatisticsImpl {
 	
 	public static double getMean(double[] data)
     {
@@ -16,7 +16,7 @@ public final class Statistics {
 		int numOfRows = data.length;
 		int numOfCols = data[0].length;
 
-	    double sum[] = new double[numOfCols];
+        double[] sum = new double[numOfCols];
 	    for(int j=0;j<numOfCols;j++){
 	    	for(int i=0;i<numOfRows;i++){
 	    		//System.out.println(Double.toString(data[i][j]));
@@ -41,8 +41,8 @@ public final class Statistics {
 	{
 		int numOfRows = data.length;
 		int numOfCols = data[0].length;
-		
-	    double means[] = Statistics.getMean(data);
+
+        double[] means = StatisticsImpl.getMean(data);
 	    double[] temp = new double[numOfCols];
 	    
 	    for(int j=0;j<numOfCols;j++){
@@ -70,7 +70,16 @@ public final class Statistics {
 			temp[i] = Math.sqrt(temp[i]);
 		}
 		return temp;
-		
+	}
+
+	public static double tolerance(double[][] x, double tol) {
+
+        double[] temp = getVariance(x);
+
+		for (int i = 0; i < temp.length; i++) {
+			temp[i] = temp[i] * tol;
+		}
+		return getMean(temp);
 	}
 
 }

@@ -1,4 +1,4 @@
-package speakerrecognition.impl;
+package utils;
 
 
 public class MyException extends Exception {
