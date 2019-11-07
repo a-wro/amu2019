@@ -71,12 +71,12 @@ public class BookRepository {
 
     private List<Book> findReleasedBefore(List<Book> booksSubList, Date date) {
         return booksSubList.stream().filter(book ->
-                book.getYearOfRelease().before(date)).collect(Collectors.toList());
+                book.getReleaseDate().before(date)).collect(Collectors.toList());
     }
 
     private List<Book> findReleasedAfter(List<Book> booksSubList, Date date) {
         return booksSubList.stream().filter(book ->
-                book.getYearOfRelease().after(date)).collect(Collectors.toList());
+                book.getReleaseDate().after(date)).collect(Collectors.toList());
     }
 
     public Optional<Book> getById(BookId id) {
@@ -105,7 +105,7 @@ public class BookRepository {
         Book actualBook = getById(id).get();
         actualBook.setAuthors(newBook.getAuthors());
         actualBook.setTitle(newBook.getTitle());
-        actualBook.setYearOfRelease(newBook.getYearOfRelease());
+        actualBook.setReleaseDate(newBook.getReleaseDate());
         return actualBook;
     }
 

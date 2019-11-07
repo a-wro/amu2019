@@ -20,15 +20,15 @@ public class Book {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_FORMAT)
     @NotNull
-    private Date yearOfRelease;
+    private Date releaseDate;
 
-    public Date getYearOfRelease() {
+    public Date getReleaseDate() {
 
-        return yearOfRelease;
+        return releaseDate;
     }
 
-    public void setYearOfRelease(Date yearOfRelease) {
-        this.yearOfRelease = yearOfRelease;
+    public void setReleaseDate(Date date) {
+        this.releaseDate = date;
     }
 
     public String getTitle() {
