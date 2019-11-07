@@ -80,14 +80,6 @@ public class BookRepository {
     }
 
     public Optional<Book> getById(BookId id) {
-        Logger logger = Logger.getGlobal();
-
-        logger.log(Level.INFO, id.getId().toString());
-
-        for (Book book : books) {
-            logger.log(Level.INFO, book.getBookId().getId().toString());
-        }
-
         return books.stream().filter(book -> book.getBookId().equals(id)).findFirst();
     }
 
