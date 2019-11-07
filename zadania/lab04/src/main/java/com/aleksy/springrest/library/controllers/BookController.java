@@ -3,6 +3,7 @@ package com.aleksy.springrest.library.controllers;
 import com.aleksy.springrest.library.exceptions.BookPreviewDisabledException;
 import com.aleksy.springrest.library.exceptions.InvalidDataException;
 import com.aleksy.springrest.library.model.Book;
+import com.aleksy.springrest.library.model.BookId;
 import com.aleksy.springrest.library.repositories.AuthorRepository;
 import com.aleksy.springrest.library.repositories.BookRepository;
 import com.aleksy.springrest.library.utils.Constants;
@@ -20,7 +21,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("book")
 public class BookController {
-    
+
     @Autowired
     private BookRepository bookRepository;
 
@@ -34,7 +35,7 @@ public class BookController {
 
     @GetMapping("{id}")
     public Book detail(@PathVariable("id") Long id) throws ResponseStatusException {
-        Optional<Book> book = bookRepository.getById(id);
+        Optional<Book> book = bookRepository.getById(new BookId(id));
         if (book.isPresent()) {
             return book.get();
         }
@@ -53,11 +54,11 @@ public class BookController {
     }
 
     @PutMapping("{id}")
-    public Book update(@RequestBody Book newBook,
+    public Book update(@RequestBody @Valid Book newBook,
                        @PathVariable("id") Long id) throws ResponseStatusException {
-
-        if (bookRepository.getById(id).isPresent()) {
-            return bookRepository.update(id, newBook);
+        BookId bookId = new BookId(id);
+        if (bookRepository.getById(bookId).isPresent()) {
+            return bookRepository.update(bookId, newBook);
         }
 
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -65,8 +66,9 @@ public class BookController {
 
     @DeleteMapping("{id}")
     public void delete(@PathVariable("id") Long id) throws ResponseStatusException {
-        if (bookRepository.getById(id).isPresent()) {
-            bookRepository.delete(id);
+        BookId bookId = new BookId(id);
+        if (bookRepository.getById(bookId).isPresent()) {
+            bookRepository.delete(bookId);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -81,7 +83,7 @@ public class BookController {
         boolean valid = validateDateQueryParams(before, after);
         if (!valid) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Please make sure before date query param is less than after date query param");
+                    "Please make sure before date query param is later than the after date query param");
         }
 
         return bookRepository.findBooks(title, before, after);
@@ -89,7 +91,7 @@ public class BookController {
 
     private boolean validateDateQueryParams(Date beforeDate, Date afterDate) {
         if (beforeDate != null && afterDate != null) {
-            return afterDate.after(beforeDate);
+            return afterDate.before(beforeDate);
         }
 
         return true;

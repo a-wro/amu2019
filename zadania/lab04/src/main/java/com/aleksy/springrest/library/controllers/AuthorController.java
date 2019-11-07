@@ -2,7 +2,9 @@ package com.aleksy.springrest.library.controllers;
 
 import com.aleksy.springrest.library.exceptions.InvalidDataException;
 import com.aleksy.springrest.library.model.Author;
+import com.aleksy.springrest.library.model.AuthorId;
 import com.aleksy.springrest.library.model.Book;
+import com.aleksy.springrest.library.model.BookId;
 import com.aleksy.springrest.library.repositories.AuthorRepository;
 import com.aleksy.springrest.library.repositories.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +28,9 @@ public class AuthorController {
     private BookRepository bookRepository;
 
     @GetMapping
-    public List<Author> list(@RequestParam(value = "book", required = false) Long bookId) {
-        if (bookId != null) {
+    public List<Author> list(@RequestParam(value = "book", required = false) Long id) {
+        if (id != null) {
+            BookId bookId = new BookId(id);
             Optional<Book> book = bookRepository.getById(bookId);
 
             if (book.isPresent()) {
@@ -42,7 +45,7 @@ public class AuthorController {
 
     @GetMapping("{id}")
     public Author detail(@PathVariable("id") Long id) {
-        Optional<Author> author = authorRepository.getById(id);
+        Optional<Author> author = authorRepository.getById(new AuthorId(id));
 
         if (author.isPresent()) {
             return author.get();
@@ -63,10 +66,11 @@ public class AuthorController {
 
 
     @PutMapping("{id}")
-    public Author update(@RequestBody Author newAuthor, @PathVariable("id") Long id) {
-        Optional<Author> author = authorRepository.getById(id);
+    public Author update(@RequestBody @Valid Author newAuthor, @PathVariable("id") Long id) {
+        AuthorId authorId = new AuthorId(id);
+        Optional<Author> author = authorRepository.getById(authorId);
         if (author.isPresent()) {
-            return authorRepository.update(id, newAuthor);
+            return authorRepository.update(authorId, newAuthor);
         }
 
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -74,8 +78,9 @@ public class AuthorController {
 
     @DeleteMapping("{id}")
     public void delete(@PathVariable("id") Long id) throws ResponseStatusException {
-        if (authorRepository.getById(id).isPresent()) {
-            authorRepository.delete(id);
+        AuthorId authorId = new AuthorId(id);
+        if (authorRepository.getById(authorId).isPresent()) {
+            authorRepository.delete(authorId);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }

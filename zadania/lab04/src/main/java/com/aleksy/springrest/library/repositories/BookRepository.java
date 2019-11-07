@@ -1,36 +1,44 @@
 package com.aleksy.springrest.library.repositories;
 
 import com.aleksy.springrest.library.exceptions.AuthorNotFoundException;
+import com.aleksy.springrest.library.model.AuthorId;
 import com.aleksy.springrest.library.model.Book;
 import com.aleksy.springrest.library.model.BookId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 
 @Repository
 public class BookRepository {
 
-    @Autowired AuthorRepository authorRepository;
+    @Autowired private AuthorRepository authorRepository;
 
     private List<Book> books = new ArrayList<>();
 
     private AtomicLong id = new AtomicLong();
 
     public Book create(Book book) throws AuthorNotFoundException {
-        book.setId(new BookId(id.incrementAndGet()));
+        book.setBookId(new BookId(id.incrementAndGet()));
 
         if (!authorRepository.authorsExist(book.getAuthors())) {
             throw new AuthorNotFoundException();
         }
 
         books.add(book);
+
+        BookId bookId = book.getBookId();
+
+        // for all authors add the book to their book set
+        for (AuthorId authorId : book.getAuthors()) {
+            authorRepository.getById(authorId).get().addBook(bookId);
+        }
+
         return book;
     }
 
@@ -71,13 +79,21 @@ public class BookRepository {
                 book.getYearOfRelease().after(date)).collect(Collectors.toList());
     }
 
-    public Optional<Book> getById(Long id) {
-        return books.stream().filter(book -> book.getId().equals(id)).findFirst();
+    public Optional<Book> getById(BookId id) {
+        Logger logger = Logger.getGlobal();
+
+        logger.log(Level.INFO, id.getId().toString());
+
+        for (Book book : books) {
+            logger.log(Level.INFO, book.getBookId().getId().toString());
+        }
+
+        return books.stream().filter(book -> book.getBookId().equals(id)).findFirst();
     }
 
-    public boolean booksExist(List<BookId> bookIds) {
+    public boolean booksExist(Set<BookId> bookIds) {
         for (BookId bookId: bookIds) {
-            Optional<Book> optionalBook = books.stream().filter(book -> book.getId().equals(bookId)).findFirst();
+            Optional<Book> optionalBook = books.stream().filter(book -> book.getBookId().equals(bookId)).findFirst();
             if (!optionalBook.isPresent()) {
                 return false;
             }
@@ -85,7 +101,7 @@ public class BookRepository {
         return true;
     }
 
-    public Book update(Long id, Book newBook) {
+    public Book update(BookId id, Book newBook) {
         Book actualBook = getById(id).get();
         actualBook.setAuthors(newBook.getAuthors());
         actualBook.setTitle(newBook.getTitle());
@@ -93,7 +109,7 @@ public class BookRepository {
         return actualBook;
     }
 
-    public void delete(Long id) {
+    public void delete(BookId id) {
         books.remove(getById(id).get());
     }
 

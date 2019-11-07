@@ -3,6 +3,7 @@ package com.aleksy.springrest.library.repositories;
 import com.aleksy.springrest.library.exceptions.BookNotFoundException;
 import com.aleksy.springrest.library.model.Author;
 import com.aleksy.springrest.library.model.AuthorId;
+import com.aleksy.springrest.library.model.Book;
 import com.aleksy.springrest.library.model.BookId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -28,7 +30,7 @@ public class AuthorRepository {
 
     public Author create(Author author) throws BookNotFoundException {
         AuthorId authorId = new AuthorId(id.incrementAndGet());
-        author.setId(authorId);
+        author.setAuthorId(authorId);
 
         if (author.getBooks() != null && !bookRepository.booksExist(author.getBooks())) {
             throw new BookNotFoundException();
@@ -38,12 +40,11 @@ public class AuthorRepository {
         return author;
     }
 
-    public Optional<Author> getById(Long id) {
-        BookId bookId = new BookId(id);
-        return authors.stream().filter(author -> author.getId().getId().equals(bookId.getId())).findFirst();
+    public Optional<Author> getById(AuthorId id) {
+        return authors.stream().filter(author -> author.getAuthorId().equals(id)).findFirst();
     }
 
-    public Author update(Long id, Author newAuthor) {
+    public Author update(AuthorId id, Author newAuthor) {
         Author actualAuthor = getById(id).get();
         actualAuthor.setFirstName(newAuthor.getFirstName());
         actualAuthor.setLastName(newAuthor.getLastName());
@@ -51,25 +52,24 @@ public class AuthorRepository {
         return actualAuthor;
     }
 
-    public void delete(Long id) {
+    public void delete(AuthorId id) {
         authors.remove(getById(id).get());
     }
 
-    public List<Author> findAuthorsOfBook(Long id) {
-        BookId bookId = new BookId(id);
-        return authors.stream().filter(author -> author.getBooks().contains(bookId)).collect(Collectors.toList());
+    public List<Author> findAuthorsOfBook(BookId id) {
+        return authors.stream().filter(author -> author.getBooks().contains(id)).collect(Collectors.toList());
     }
 
-    public boolean authorsExist(List<AuthorId> authorIds) {
+    public boolean authorsExist(Set<AuthorId> authorIds) {
         for (AuthorId authorId : authorIds) {
-            Optional<Author> optionalAuthor = authors.stream().filter(author -> author.getId().equals(authorId)).findFirst();
+            Optional<Author> optionalAuthor = authors.stream().filter(author ->
+                    author.getAuthorId().equals(authorId)).findFirst();
             if (!optionalAuthor.isPresent()) {
                 return false;
             }
         }
         return true;
     }
-
 }
 
 

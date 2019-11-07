@@ -6,17 +6,17 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class Book {
+
     @NotEmpty
     private String title;
 
-    @Size(min = 1)
-    private List<AuthorId> authors;
+    @Size(min = 1, message = "Books must have at least one author")
+    private Set<AuthorId> authors = new HashSet<>();
 
-    private BookId id;
+    private BookId bookId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_FORMAT)
     @NotNull
@@ -39,19 +39,19 @@ public class Book {
         this.title = title;
     }
 
-    public List<AuthorId> getAuthors() {
+    public Set<AuthorId> getAuthors() {
         return authors;
     }
 
-    public void setAuthors(List<AuthorId> authors) {
+    public void setAuthors(Set<AuthorId> authors) {
         this.authors = authors;
     }
 
-    public BookId getId() {
-        return id;
+    public BookId getBookId() {
+        return bookId;
     }
 
-    public void setId(BookId id) {
-        this.id = id;
+    public void setBookId(BookId bookId) {
+        this.bookId = bookId;
     }
 }

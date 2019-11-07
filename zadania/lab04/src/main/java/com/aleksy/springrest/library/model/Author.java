@@ -1,12 +1,14 @@
 package com.aleksy.springrest.library.model;
 
 import javax.validation.constraints.NotEmpty;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Author {
-    private List<BookId> books;
 
-    private AuthorId id;
+    private Set<BookId> books = new HashSet<>();
+
+    private AuthorId authorId;
 
     @NotEmpty
     private String firstName;
@@ -30,20 +32,24 @@ public class Author {
         this.lastName = lastName;
     }
 
-    public List<BookId> getBooks() {
+    public Set<BookId> getBooks() {
         return books;
     }
 
-    public void setBooks(List<BookId> books) {
+    public void setBooks(Set<BookId> books) {
         this.books = books;
     }
 
-    public AuthorId getId() {
-        return id;
+    public AuthorId getAuthorId() {
+        return authorId;
     }
 
-    public void setId(AuthorId id) {
-        this.id = id;
+    public void setAuthorId(AuthorId authorId) {
+        this.authorId = authorId;
+    }
+
+    public void addBook(BookId bookId) {
+        books.add(bookId);
     }
 
 }
