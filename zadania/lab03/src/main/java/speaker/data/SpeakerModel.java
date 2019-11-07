@@ -1,6 +1,6 @@
 package speaker.data;
 import matrixes.Matrixes;
-import statistics.impl.StatisticsImpl;
+import statistics.Statistics;
 import utils.MyException;
 
 import java.io.Serializable;
@@ -44,7 +44,7 @@ public class SpeakerModel implements Serializable{
 		double[][] lpr = log_multivariate_normal_density(data, this.means, this.covars);
 		lpr = Matrixes.addValue(lpr, Matrixes.makeLog(this.weights));
 		logprob = Matrixes.logsumexp(lpr);
-		score = StatisticsImpl.getMean(logprob);
+		score = Statistics.getMean(logprob);
 		return score;
 	}
 	

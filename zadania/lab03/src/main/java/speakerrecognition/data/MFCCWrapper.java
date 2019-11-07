@@ -1,6 +1,6 @@
 package speakerrecognition.data;
 
-import speakerrecognition.impl.MFCCProcessingService;
+import speakerrecognition.mfcc.MFCCProcessor;
 
 public class MFCCWrapper {
     public static int mfcc_num = 13;
@@ -37,11 +37,11 @@ public class MFCCWrapper {
         this.frame_len = 256;
         this.fft_size = this.frame_len;
         this.frame_shift = setFrameShift(fs);
-        window = MFCCProcessingService.hamming(frame_len);
+        window = MFCCProcessor.hamming(frame_len);
 
-        this.melfb_coeffs = MFCCProcessingService.melfb(melfilter_bands, fft_size, fs);
+        this.melfb_coeffs = MFCCProcessor.melfb(melfilter_bands, fft_size, fs);
 
-        this.D1 = MFCCProcessingService.dctmatrix(melfilter_bands);
+        this.D1 = MFCCProcessor.dctmatrix(melfilter_bands);
 
         if (this.melfb_coeffs == null) System.out.println("Cannot initialize melfilter bank");
     }

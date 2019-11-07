@@ -1,7 +1,7 @@
-package statistics.impl;
+package statistics;
 
 
-public final class StatisticsImpl {
+public final class Statistics {
 	
 	public static double getMean(double[] data)
     {
@@ -42,7 +42,7 @@ public final class StatisticsImpl {
 		int numOfRows = data.length;
 		int numOfCols = data[0].length;
 
-        double[] means = StatisticsImpl.getMean(data);
+        double[] means = Statistics.getMean(data);
 	    double[] temp = new double[numOfCols];
 	    
 	    for(int j=0;j<numOfCols;j++){

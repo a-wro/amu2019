@@ -9,13 +9,14 @@ import file.impl.WavFileReader;
 import speaker.data.SpeakerModel;
 import speakerrecognition.data.MFCCWrapper;
 import speakerrecognition.interfaces.ISpeakerRecognition;
+import speakerrecognition.mfcc.MFCCProcessor;
 import utils.MyException;
 
 public class SpeakerRecognitionImpl implements ISpeakerRecognition {
 
 	public double[][] computeMFCC(int[] soundSamples, int fs) {
 		MFCCWrapper mfcc = new MFCCWrapper(soundSamples, fs);
-		double[][] speaker_mfcc = MFCCProcessingService.extract_MFCC(mfcc).getMfcc_coeffs();
+		double[][] speaker_mfcc = MFCCProcessor.extract_MFCC(mfcc).getMfcc_coeffs();
 		return speaker_mfcc;
 	}
 
@@ -28,7 +29,7 @@ public class SpeakerRecognitionImpl implements ISpeakerRecognition {
 			int[] x3 = wavFile1.getSamples();
 			int fs3 = wavFile1.getFs();
 			MFCCWrapper mfcc3 = new MFCCWrapper(x3, fs3);
-			double[][] speaker_mfcc3 =  MFCCProcessingService.extract_MFCC(mfcc3).getMfcc_coeffs();
+			double[][] speaker_mfcc3 =  MFCCProcessor.extract_MFCC(mfcc3).getMfcc_coeffs();
 			double scoreForTest1 = model.getScore(speaker_mfcc3);
 			if(scoreForTest1 > finalScore){
 				finalScore = scoreForTest1;
@@ -48,7 +49,7 @@ public class SpeakerRecognitionImpl implements ISpeakerRecognition {
 			int[] x3 = wavFile1.getSamples();
 			int fs3 = wavFile1.getFs();
 			MFCCWrapper mfcc3 = new MFCCWrapper(x3, fs3);
-			double[][] speaker_mfcc3 =  MFCCProcessingService.extract_MFCC(mfcc3).getMfcc_coeffs();
+			double[][] speaker_mfcc3 =  MFCCProcessor.extract_MFCC(mfcc3).getMfcc_coeffs();
 			double scoreForTest1 = model.getScore(speaker_mfcc3);
 			System.out.println("Test speech from file "+resourceSoundSpeechFilePath + " is similar to model "+ model.getName()+" with log probability "+scoreForTest1);
 			

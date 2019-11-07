@@ -1,10 +1,10 @@
-package speakerrecognition.impl;
+package speakerrecognition.mstep;
 
 import matrixes.Matrixes;
 import speakerrecognition.data.MStep;
 import utils.MathConstants;
 
-public class MStepService {
+public class MStepProcessor {
     public static MStep do_mstep(double[][] data, double[][] responsibilities, double min_covar, double[][] covars) throws Exception {
         try {
             double[] weights = Matrixes.sum(responsibilities, 0);

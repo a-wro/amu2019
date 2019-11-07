@@ -1,17 +1,37 @@
-package speakerrecognition.impl;
+package speakerrecognition.gmm;
 
 import matrixes.Matrixes;
 import speakerrecognition.data.GMMWrapper;
 import speakerrecognition.data.KMeansWrapper;
 import speakerrecognition.data.MStep;
 import speakerrecognition.data.ScoreSamples;
-import statistics.impl.StatisticsImpl;
+import speakerrecognition.kmeans.KMeansProcessor;
+import speakerrecognition.mstep.MStepProcessor;
+import statistics.Statistics;
 import utils.MyException;
 
 // https://commons.apache.org/proper/commons-math/apidocs/org/apache/commons/math3/distribution/fitting/MultivariateNormalMixtureExpectationMaximization.html
 // https://www.ee.washington.edu/techsite/papers/documents/UWEETR-2010-0002.pdf
 
-public class GMMProcessingService {
+/**
+ * TODO - porobic interfejsy do GMM, KMeans, MFCC itd, te klasy tutaj przeniesc do innych pakietów
+ * i niech impementacje korzystają
+ * np
+ * interfaces
+ *   IGMMProcessingService
+ * impl
+ *   GMMProcessingServiceImpl
+ *  gmm
+ *    GMMProcessor (aktualna klasa ze statycznymi funkcjami)
+ *    ----------------------------------------------------------------------------------------------------------------
+ *    mozna zamienic GMMWrapper itd na mniejszy obiekt agregujący potrzebne parametry jako parametr zamiast oldWrapper
+ *
+ *    dodatkowo: mozna sprobowac zrobic krotsze metody, ogarnac nazwy zmiennych, czesciowo przeniesc do springa
+ *
+ *
+ */
+
+public class GMMProcessor {
 	public static GMMWrapper fitGMM(GMMWrapper oldWrapper) throws MyException {
 		double change = 0;
 		GMMWrapper fitWrapper = new GMMWrapper(oldWrapper);
@@ -23,7 +43,7 @@ public class GMMProcessingService {
 
 			for (int i = 0; i < fitWrapper.getN_init(); i++) {
 				KMeansWrapper kMeans = new KMeansWrapper(fitWrapper.getObservations(), fitWrapper.getNumOfComponents());
-				kMeans = KMeansProcessingService.fit(kMeans);
+				kMeans = KMeansProcessor.fit(kMeans);
 				fitWrapper.setMeans(kMeans.getBest_cluster_centers());
 				fitWrapper.setWeights(
 						Matrixes.fillWith(fitWrapper.getWeights(), (double) 1 / fitWrapper.getNumOfComponents()));
@@ -44,7 +64,7 @@ public class GMMProcessingService {
 							fitWrapper.getCovars(), fitWrapper.getWeights(), fitWrapper.getNumOfComponents());
 					fitWrapper.setLog_likelihoods(scoreSamples.getLogprob());
 					fitWrapper.setResponsibilities(scoreSamples.getResponsibilities());
-					fitWrapper.setCurrent_log_likelihood(StatisticsImpl.getMean(fitWrapper.getLog_likelihoods()));
+					fitWrapper.setCurrent_log_likelihood(Statistics.getMean(fitWrapper.getLog_likelihoods()));
 
 					if (!Double.isNaN(fitWrapper.getPrev_log_likelihood())) {
 						change = Math.abs(fitWrapper.getCurrent_log_likelihood() - fitWrapper.getPrev_log_likelihood());
@@ -55,7 +75,7 @@ public class GMMProcessingService {
 					}
 
 					/// do m-step - gmm.py line 509
-					MStep mstep = MStepService.do_mstep(fitWrapper.getObservations(), fitWrapper.getResponsibilities(),
+					MStep mstep = MStepProcessor.do_mstep(fitWrapper.getObservations(), fitWrapper.getResponsibilities(),
 							fitWrapper.getMin_covar(), fitWrapper.getCovars());
 					fitWrapper.setWeights(mstep.getWeights());
 					fitWrapper.setMeans(mstep.getMeans());

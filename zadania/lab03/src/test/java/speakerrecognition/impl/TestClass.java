@@ -1,7 +1,6 @@
 package speakerrecognition.impl;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +13,9 @@ import org.junit.Test;
 import speaker.data.SpeakerModel;
 import speakerrecognition.data.GMMWrapper;
 import speakerrecognition.data.MFCCWrapper;
+import speakerrecognition.gmm.GMMProcessor;
 import speakerrecognition.interfaces.ISpeakerRecognition;
+import speakerrecognition.mfcc.MFCCProcessor;
 import utils.MyException;
 
 
@@ -32,9 +33,9 @@ public class TestClass {
 		int[] x = wavFile.getSamples();
 		int fs = wavFile.getFs();
 		MFCCWrapper mfcc = new MFCCWrapper(x, fs);
-		double[][] speaker_mfcc = MFCCProcessingService.extract_MFCC(mfcc).getMfcc_coeffs();
+		double[][] speaker_mfcc = MFCCProcessor.extract_MFCC(mfcc).getMfcc_coeffs();
 		GMMWrapper gmm = new GMMWrapper(speaker_mfcc, 32);
-		gmm = GMMProcessingService.fitGMM(gmm);
+		gmm = GMMProcessor.fitGMM(gmm);
 
 		SpeakerModel speakerModel1 = new SpeakerModel(gmm.getMeans(), gmm.getCovars(), gmm.getWeights(), "speaker1model");
 
@@ -42,9 +43,9 @@ public class TestClass {
 		int[] x2 = wavFile2.getSamples();
 		int fs2 = wavFile2.getFs();
 		MFCCWrapper mfcc2 = new MFCCWrapper(x2, fs2);
-		double[][] speaker_mfcc2 = MFCCProcessingService.extract_MFCC(mfcc2).getMfcc_coeffs();
+		double[][] speaker_mfcc2 = MFCCProcessor.extract_MFCC(mfcc2).getMfcc_coeffs();
 		GMMWrapper gmm2 = new GMMWrapper(speaker_mfcc2, 32);
-		gmm2 = GMMProcessingService.fitGMM(gmm2);
+		gmm2 = GMMProcessor.fitGMM(gmm2);
 		SpeakerModel speakerModel2 = new SpeakerModel(gmm2.getMeans(), gmm2.getCovars(), gmm2.getWeights(), "speaker2model");
 
 		List<SpeakerModel> speakerModels = Arrays.asList(speakerModel1, speakerModel2);

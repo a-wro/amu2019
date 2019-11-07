@@ -1,13 +1,13 @@
-package speakerrecognition.impl;
+package speakerrecognition.kmeans;
 
 
 import matrixes.Matrixes;
 import speakerrecognition.data.KMeansWrapper;
-import statistics.impl.StatisticsImpl;
+import statistics.Statistics;
 
 import java.util.Arrays;
 
-public class KMeansProcessingService {
+public class KMeansProcessor {
 
     public static KMeansWrapper fit(KMeansWrapper oldWrapper) {
         KMeansWrapper fitWrapper = new KMeansWrapper(oldWrapper);
@@ -22,7 +22,7 @@ public class KMeansProcessingService {
         try {
 
             ////////// substracting mean //////////////
-            double[] X_mean = StatisticsImpl.getMean(data);
+            double[] X_mean = Statistics.getMean(data);
             for (int i = 0; i < fitWrapper.getNumOfRows(); i++) {
                 for (int j = 0; j < fitWrapper.getNumOfCols(); j++) {
                     data[i][j] -= X_mean[j];

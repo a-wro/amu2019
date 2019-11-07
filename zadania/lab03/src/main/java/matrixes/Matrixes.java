@@ -2,7 +2,7 @@ package matrixes;
 
 
 import utils.MyException;
-import statistics.impl.StatisticsImpl;
+import statistics.Statistics;
 
 public final class Matrixes {
 	
@@ -523,7 +523,7 @@ public final class Matrixes {
 		try{
 			temp = Matrixes.copy2dArray(x);
 			//////////substracting mean //////////////
-			X_mean = StatisticsImpl.getMean(Matrixes.transpose(x));
+			X_mean = Statistics.getMean(Matrixes.transpose(x));
 			for(int j=0;j<x[0].length;j++){
 				for(int i=0; i<x.length; i++){
 					temp[i][j] -= X_mean[i];

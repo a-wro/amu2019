@@ -1,4 +1,4 @@
-package speakerrecognition.impl;
+package speakerrecognition.mfcc;
 
 
 import matrixes.Matrixes;
@@ -6,7 +6,7 @@ import org.jtransforms.fft.DoubleFFT_1D;
 import speakerrecognition.data.MFCCWrapper;
 
 
-public class MFCCProcessingService {
+public class MFCCProcessor {
 ///////////////// computation of mel filterbank ////////////////
 
 	public static double[][] melfb(int p, int n, int fs){

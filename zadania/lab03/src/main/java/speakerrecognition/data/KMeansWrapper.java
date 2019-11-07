@@ -1,7 +1,7 @@
 package speakerrecognition.data;
 
 import matrixes.Matrixes;
-import statistics.impl.StatisticsImpl;
+import statistics.Statistics;
 
 public class KMeansWrapper {
     private int numOfClusters;
@@ -75,7 +75,7 @@ public class KMeansWrapper {
     public KMeansWrapper(double[][] x, int numOfClust) {
         this.numOfClusters = numOfClust;
         double tol = 0.0001;
-        this.tol = StatisticsImpl.tolerance(x, tol);
+        this.tol = Statistics.tolerance(x, tol);
         this.numOfRows = x.length;
         this.numOfCols = x[0].length;
         this.data = Matrixes.copy2dArray(x);
