@@ -28,5 +28,13 @@ public class Runner {
         logger.log(Level.INFO, "Price of a cheeseburger with extra meat: "
                 + cheeseburgerWithExtraMeat.getCost());
 
+        Product fullstackCheeseburger = new ProductWithExtraMeat(
+                new ProductWithExtraCheese(
+                        new ProductWithExtraCheese(cheeseburger)));
+
+        logger.log(Level.INFO, "Price of a cheeseburger with extra meat and double extra cheese: "
+                + fullstackCheeseburger.getCost());
+
+
     }
 }
